@@ -1,0 +1,14 @@
+<div class="card">
+  <div class="avatar">
+    <img src="{{ .user.avatar_url }}" />
+  </div>
+  <div class="details">
+    <div>
+      <a href="{{ .user.url }}">{{ .user.login }}</a> posted at
+      {{ dateFormat "Mon, 02 Jan 2006 15:04:05 MST" .created_at }}
+    </div>
+    <div>
+      <p>{{ .body | markdownify }}</p>
+    </div>
+  </div>
+</div>

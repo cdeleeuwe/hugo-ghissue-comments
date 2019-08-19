@@ -1,3 +1,5 @@
 ---
 title: GitHub issue Comments
----
+params:
+  comments_repo: cdeleeuwe/hugo-ghissue-comments
+  enable_auth: true

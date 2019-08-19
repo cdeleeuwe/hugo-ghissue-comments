@@ -1,0 +1,41 @@
+{{ partial "head" . }}
+
+{{ $scratch := newScratch }}
+{{ $scratch.Set "comments_apiurl" "" }}
+{{ $scratch.Set "comments" slice }}
+
+{{ $client_id := string (getenv "GITHUB_CLIENT_ID") }}
+{{ $secret := string (getenv "GITHUB_CLIENT_SECRET") }}
+{{ $auth_query := cond .Site.Params.enable_auth (print "?client_id=" $client_id "client_secret=" $secret) "" }}
+{{ $api_baseurl := print "https://api.github.com/repos/" .Site.Params.comments_repo }}
+{{ $issue_url := (printf "https://github.com/%s/issues/%s" .Site.Params.comments_repo .Params.github_issue) }}
+
+{{ if (.Params.by_issuenumber) }}
+
+  <!-- Find comments directly by issue number -->
+  {{ $scratch.Set "comments_apiurl" (print $api_baseurl "/issues/" .Params.github_issue "/comments" $auth_query) }}
+
+{{ else }}
+
+  <!-- Find comments by name. In this case they are named .Title + "Comments" -->
+  {{ $issues_apiurl := print $api_baseurl "/issues" $auth_query }}
+  {{ $issues := getJSON $issues_apiurl }}
+  {{ $issue_title := printf "%s Comments" .Title }}
+
+  {{ range where $issues "title" $issue_title }}
+    {{ $scratch.Set "comments_apiurl" (print .comments_url $auth_query) }}
+  {{ end }}
+
+{{ end }}
+
+{{ $scratch.Set "comments" (getJSON ($scratch.Get "comments_apiurl")) }}
+
+
+<h2 class="title">Visit the <a href="{{ $issue_url }}" target="_blank">GitHub issue</a> to comment on this post.</h2>
+{{ range ($scratch.Get "comments") }}
+    {{ partial "card" . }}
+{{ end }}
+
+{{ partial "foot" . }}
+
+
